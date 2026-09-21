@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>DOM Tracker</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0; width: 260px; padding: 12px;
+        background: #14161c; color: #e6e8ee;
+        font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      h1 { font-size: 13px; margin: 0 0 2px; display: flex; align-items: center; gap: 6px; }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+      .dot[data-status="green"] { background: #2ecc71; }
+      .dot[data-status="amber"] { background: #f1c40f; }
+      .dot[data-status="red"]   { background: #e74c3c; }
+      .origin { color: #9aa0ad; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; }
+      label { color: #cfd3dc; }
+      input[type="number"], select {
+        background: #1e2129; color: #e6e8ee; border: 1px solid #333846; border-radius: 4px;
+        padding: 3px 6px; font: inherit; width: 110px;
+      }
+      .switch { position: relative; width: 36px; height: 20px; }
+      .switch input { opacity: 0; width: 0; height: 0; }
+      .slider { position: absolute; inset: 0; background: #333846; border-radius: 20px; cursor: pointer; transition: .15s; }
+      .slider:before { content: ""; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .15s; }
+      input:checked + .slider { background: #2ecc71; }
+      input:checked + .slider:before { transform: translateX(16px); }
+      button {
+        all: unset; cursor: pointer; text-align: center; padding: 5px 8px; border-radius: 4px;
+        background: #262a35; color: #e6e8ee; font: inherit;
+      }
+      button:hover { background: #333846; }
+      button:disabled { opacity: .4; cursor: default; }
+      .actions { display: flex; gap: 6px; margin-top: 10px; }
+      .actions button { flex: 1; }
+      .hint { color: #9aa0ad; font-size: 11px; margin-top: 8px; }
+      .unavailable { color: #e74c3c; }
+    </style>
+  </head>
+  <body>
+    <h1><span class="dot" id="dot"></span>DOM Tracker <span id="nodes" style="color:#9aa0ad;font-weight:400"></span></h1>
+    <div class="origin" id="origin">…</div>
+
+    <div class="row">
+      <label for="enabled">Show HUD on this site</label>
+      <span class="switch"><input type="checkbox" id="enabled" /><span class="slider"></span></span>
+    </div>
+    <div class="row">
+      <label for="corner">Corner</label>
+      <select id="corner">
+        <option value="top-left">Top left</option>
+        <option value="top-right">Top right</option>
+        <option value="bottom-left">Bottom left</option>
+        <option value="bottom-right">Bottom right</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="nodes-budget">Node budget</label>
+      <input type="number" id="nodes-budget" min="100" step="100" />
+    </div>
+
+    <div class="actions">
+      <button id="download" title="Download a JSON snapshot of the current metrics">Download snapshot</button>
+      <button id="options" title="Per-site budgets">Options</button>
+    </div>
+    <div class="hint" id="hint"></div>
+
+    <script type="module" src="./popup.ts"></script>
+  </body>
+</html>

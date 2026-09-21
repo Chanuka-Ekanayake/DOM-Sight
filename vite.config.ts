@@ -6,11 +6,11 @@ import { copyFileSync, mkdirSync } from 'node:fs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
- * Multi-entry build for a Manifest V3 extension.
- * - content / background are IIFE-style single files (no code splitting, no ESM imports at runtime).
- * - popup / options are HTML pages with their own scripts.
+ * Build 1 of 2: popup + options pages and the background service worker (all ESM-capable).
+ * The content script is built separately as a self-contained IIFE — see vite.content.config.ts.
  */
 export default defineConfig({
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -19,7 +19,6 @@ export default defineConfig({
     target: 'es2022',
     rollupOptions: {
       input: {
-        content: resolve(__dirname, 'src/content/index.ts'),
         background: resolve(__dirname, 'src/background.ts'),
         popup: resolve(__dirname, 'src/popup/popup.html'),
         options: resolve(__dirname, 'src/options/options.html'),
@@ -28,11 +27,7 @@ export default defineConfig({
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name].js',
         assetFileNames: 'assets/[name][extname]',
-        // Keep content + background self-contained: no shared chunks.
-        manualChunks: () => undefined,
-        inlineDynamicImports: false,
       },
-      preserveEntrySignatures: false,
     },
   },
   plugins: [

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>DOM Tracker — Options</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0; padding: 24px; max-width: 900px;
+        background: #14161c; color: #e6e8ee;
+        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      h1 { font-size: 18px; margin: 0 0 4px; }
+      p.lead { color: #9aa0ad; margin: 0 0 18px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #262a35; }
+      th { color: #9aa0ad; font-weight: 600; font-size: 12px; }
+      td.origin { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      input[type="number"], input[type="text"] {
+        background: #1e2129; color: #e6e8ee; border: 1px solid #333846; border-radius: 4px;
+        padding: 3px 6px; font: inherit; width: 80px;
+      }
+      input[type="text"] { width: 100%; box-sizing: border-box; }
+      button {
+        all: unset; cursor: pointer; padding: 4px 10px; border-radius: 4px;
+        background: #262a35; color: #e6e8ee; font: inherit;
+      }
+      button:hover { background: #333846; }
+      button.danger:hover { background: #7a2a22; }
+      .add { display: flex; gap: 8px; margin-top: 16px; align-items: center; }
+      .add input { flex: 1; }
+      .defaults { color: #9aa0ad; font-size: 12px; margin-top: 18px; }
+      .empty { color: #9aa0ad; padding: 12px 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>DOM Tracker — per-site budgets</h1>
+    <p class="lead">Thresholds are "red at or above"; amber starts at 60%. Changes apply live to open tabs.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Origin</th>
+          <th>HUD</th>
+          <th>Nodes</th>
+          <th>Max depth</th>
+          <th>Max children</th>
+          <th>Long task ms</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <div class="add">
+      <input type="text" id="new-origin" placeholder="https://localhost:5001" />
+      <button id="add">Add site</button>
+    </div>
+    <div class="defaults" id="defaults"></div>
+
+    <script type="module" src="./options.ts"></script>
+  </body>
+</html>
