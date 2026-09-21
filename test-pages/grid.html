@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DOM Tracker — grid test page</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    button { padding: 6px 12px; }
+    table { border-collapse: collapse; font-size: 12px; }
+    td, th { border: 1px solid #ddd; padding: 2px 6px; white-space: nowrap; }
+    #status { color: #666; margin-left: auto; }
+  </style>
+</head>
+<body>
+  <h1>Grid test page</h1>
+  <p>Enable the DOM Tracker HUD from the toolbar popup, then grow the table and watch the gauge.</p>
+  <div class="toolbar">
+    <button data-rows="100">+100 rows</button>
+    <button data-rows="1000">+1,000 rows</button>
+    <button data-rows="10000">+10,000 rows</button>
+    <button data-rows="50000">+50,000 rows</button>
+    <button id="clear">Clear</button>
+    <button id="churn">Churn 200 rows/s</button>
+    <span id="status"></span>
+  </div>
+  <div id="grid">
+    <table>
+      <thead><tr><th>#</th><th>Employee</th><th>Department</th><th>Leave type</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <script>
+    const tbody = document.getElementById('rows');
+    const status = document.getElementById('status');
+    const depts = ['Engineering', 'Finance', 'HR', 'Sales', 'Support'];
+    const types = ['Annual', 'Casual', 'Sick', 'Unpaid'];
+    let n = 0;
+
+    function addRows(count) {
+      const t0 = performance.now();
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        n++;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${n}</td><td>Employee ${n}</td><td>${depts[n % 5]}</td><td>${types[n % 4]}</td>` +
+          `<td>2026-0${1 + (n % 9)}-0${1 + (n % 9)}</td><td>2026-0${1 + (n % 9)}-1${n % 9}</td><td>${1 + (n % 10)}</td>` +
+          `<td>${n % 3 ? 'Approved' : 'Pending'}</td>`;
+        frag.append(tr);
+      }
+      tbody.append(frag);
+      status.textContent = `${tbody.children.length.toLocaleString()} rows · render ${Math.round(performance.now() - t0)} ms`;
+    }
+
+    document.querySelectorAll('button[data-rows]').forEach((b) =>
+      b.addEventListener('click', () => addRows(Number(b.dataset.rows))));
+    document.getElementById('clear').addEventListener('click', () => {
+      tbody.replaceChildren();
+      n = 0;
+      status.textContent = '0 rows';
+    });
+
+    let churn;
+    document.getElementById('churn').addEventListener('click', (e) => {
+      if (churn) { clearInterval(churn); churn = undefined; e.target.textContent = 'Churn 200 rows/s'; return; }
+      e.target.textContent = 'Stop churn';
+      churn = setInterval(() => {
+        for (let i = 0; i < 20 && tbody.firstChild; i++) tbody.firstChild.remove();
+        addRows(20);
+      }, 100);
+    });
+  </script>
+</body>
+</html>

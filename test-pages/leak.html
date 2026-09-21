@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DOM Tracker — detached node leak test page</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    button { padding: 6px 12px; margin-right: 8px; }
+    #log { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Leak test page</h1>
+  <p>Creates 2,000 elements every 200 ms, briefly attaches them, then <strong>detaches but keeps references</strong>.
+     The DOM count stays flat while the JS heap climbs — the signature of a detached-node leak.</p>
+  <button id="start">Start leaking</button>
+  <button id="stop">Stop</button>
+  <button id="release">Release references</button>
+  <span id="log"></span>
+  <div id="stage"></div>
+  <script>
+    const leaked = [];
+    const stage = document.getElementById('stage');
+    const log = document.getElementById('log');
+    let timer;
+    document.getElementById('start').addEventListener('click', () => {
+      if (timer) return;
+      timer = setInterval(() => {
+        const frag = document.createElement('div');
+        for (let i = 0; i < 2000; i++) {
+          const el = document.createElement('span');
+          el.textContent = 'leak ' + i;
+          el.dataset.payload = 'x'.repeat(200);
+          frag.append(el);
+        }
+        stage.append(frag);
+        stage.replaceChildren();
+        leaked.push(frag);
+        log.textContent = `${(leaked.length * 2000).toLocaleString()} detached elements retained`;
+      }, 200);
+    });
+    document.getElementById('stop').addEventListener('click', () => { clearInterval(timer); timer = undefined; });
+    document.getElementById('release').addEventListener('click', () => { leaked.length = 0; log.textContent = 'released'; });
+  </script>
+</body>
+</html>
