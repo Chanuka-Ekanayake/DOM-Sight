@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { copyFileSync, mkdirSync } from 'node:fs';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Multi-entry build for a Manifest V3 extension.
