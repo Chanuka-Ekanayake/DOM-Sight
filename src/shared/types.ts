@@ -54,6 +54,8 @@ export interface SiteConfig {
   enabled: boolean;
   corner: Corner;
   collapsed: boolean;
+  /** Set when the HUD was dragged away from its corner. */
+  position?: { x: number; y: number };
   budget: Budget;
 }
 
@@ -70,7 +72,14 @@ export interface Snapshot {
 /** Messages exchanged between popup / background / content script. */
 export type Message =
   | { type: 'get-state' }
-  | { type: 'set-enabled'; enabled: boolean }
   | { type: 'get-snapshot' }
   | { type: 'badge'; nodes: number | undefined; status: Status }
   | { type: 'download-snapshot'; snapshot: Snapshot };
+
+/** Reply to 'get-state' from the content script. */
+export interface TrackerState {
+  origin: string;
+  enabled: boolean;
+  nodes?: number;
+  status: Status;
+}

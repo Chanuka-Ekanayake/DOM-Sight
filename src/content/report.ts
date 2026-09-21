@@ -20,15 +20,3 @@ export function buildSnapshot(input: SnapshotInput): Snapshot {
     history: input.history.values(),
   };
 }
-
-
-export function snapshotFileName(snapshot: Snapshot): string {
-  let host = 'page';
-  try {
-    host = new URL(snapshot.url).host.replace(/[^a-z0-9.-]/gi, '_');
-  } catch {
-    /* keep fallback */
-  }
-  const stamp = snapshot.timestamp.replace(/[:.]/g, '-');
-  return `dom-tracker_${host}_${stamp}.json`;
-}

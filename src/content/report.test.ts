@@ -1,4 +1,4 @@
-import { buildSnapshot, snapshotFileName } from './report';
+import { buildSnapshot } from './report';
 import { DEFAULT_BUDGET } from '../shared/defaults';
 import { History } from './history';
 
@@ -37,19 +37,5 @@ describe('buildSnapshot', () => {
   it('serialises to JSON round-trip without loss', () => {
     const s = buildSnapshot({ url: 'x', metrics, budget: DEFAULT_BUDGET, status: 'amber', history: new History(1) });
     expect(JSON.parse(JSON.stringify(s))).toEqual(s);
-  });
-});
-
-describe('snapshotFileName', () => {
-  const base = { budget: DEFAULT_BUDGET, metrics: {}, status: 'green' as const, heaviest: [], history: [] };
-
-  it('builds a filesystem-safe name from host and timestamp', () => {
-    const name = snapshotFileName({ ...base, url: 'https://localhost:5001/leave/apply', timestamp: '2026-09-21T10:15:30.123Z' });
-    expect(name).toBe('dom-tracker_localhost_5001_2026-09-21T10-15-30-123Z.json');
-  });
-
-  it('falls back to "page" when the url is not parseable', () => {
-    const name = snapshotFileName({ ...base, url: 'not a url', timestamp: '2026-09-21T10:15:30.123Z' });
-    expect(name).toBe('dom-tracker_page_2026-09-21T10-15-30-123Z.json');
   });
 });
