@@ -1,7 +1,14 @@
 type Listener = (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>, area: string) => void;
 
-/** Minimal in-memory stand-in for chrome.storage.sync, onChanged and runtime.sendMessage. */
-export function fakeChrome() {
+export interface FakeChromeOptions {
+  /** URL reported for the active tab by chrome.tabs.query. */
+  tabUrl?: string;
+  /** Replies returned by chrome.tabs.sendMessage, keyed by message type. */
+  tabReplies?: Record<string, unknown>;
+}
+
+/** Minimal in-memory stand-in for the chrome.* APIs this extension uses. */
+export function fakeChrome(options: FakeChromeOptions = {}) {
   const store: Record<string, unknown> = {};
   const listeners: Listener[] = [];
   const emit = (changes: Record<string, { oldValue?: unknown; newValue?: unknown }>) =>
@@ -34,12 +41,33 @@ export function fakeChrome() {
     removeListener: (l: Listener) => listeners.splice(listeners.indexOf(l), 1),
   };
   const messages: unknown[] = [];
+  let optionsPageOpened = 0;
   const runtime = {
     sendMessage: async (m: unknown) => {
       messages.push(m);
       return true;
     },
     onMessage: { addListener: () => {} },
+    openOptionsPage: async () => void optionsPageOpened++,
   };
-  return { chrome: { storage: { sync, onChanged }, runtime }, store, listeners, messages };
+
+  const tabMessages: unknown[] = [];
+  const tabs = {
+    query: async () => (options.tabUrl === undefined ? [] : [{ id: 1, url: options.tabUrl }]),
+    sendMessage: async (_tabId: number, m: { type: string }) => {
+      tabMessages.push(m);
+      const reply = options.tabReplies?.[m.type];
+      if (reply === undefined) throw new Error('Could not establish connection.');
+      return reply;
+    },
+  };
+
+  return {
+    chrome: { storage: { sync, onChanged }, runtime, tabs },
+    store,
+    listeners,
+    messages,
+    tabMessages,
+    optionsPageOpened: () => optionsPageOpened,
+  };
 }

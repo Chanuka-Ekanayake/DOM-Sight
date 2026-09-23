@@ -53,8 +53,24 @@ npm run build          # -> dist/
 - **Snapshot** copies a JSON report (metrics, budget, status, top-5 heavy subtrees, 60 s history) to the
   clipboard — attach it to a bug or work item. On pages where the clipboard is unavailable it downloads
   instead; the popup's **Download snapshot** always downloads.
+- **Page type** in the popup sets the node budget from a preset instead of typing a number. The box
+  below still accepts any value; the dropdown then reads **Custom**.
 - **Options** (from the popup) lists every configured origin with its own node / depth / children /
   long-task thresholds. Changes apply live to open tabs.
+
+### Page-type presets
+
+Starting points to calibrate from — the right budget is the count at which a page stops feeling fast:
+
+| Page type | Nodes |
+| --------- | ----- |
+| Public / marketing page | 1,500 |
+| CRUD form / detail screen | 2,500 |
+| Dashboard / widgets | 4,000 |
+| Paged data grid | 6,000 |
+| Virtualized / infinite grid | 10,000 |
+
+Above 10,000 the fix is virtualization or paging, not a larger budget.
 
 ## How it measures without skewing the numbers
 

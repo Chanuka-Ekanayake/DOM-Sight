@@ -1,6 +1,7 @@
 import type { Corner, Snapshot, TrackerState } from '../shared/types';
 import { loadSiteConfig, saveSiteConfig } from '../shared/storage';
 import { sendToRuntime, sendToTab } from '../shared/messaging';
+import { CUSTOM_PRESET_ID, PAGE_TYPE_PRESETS, presetIdForNodes } from '../shared/presets';
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -19,8 +20,26 @@ function originOf(url: string | undefined): string | undefined {
   }
 }
 
+/** Fills the page-type dropdown from the preset table, plus a trailing "Custom" entry. */
+function fillPageTypes(select: HTMLSelectElement): void {
+  for (const preset of PAGE_TYPE_PRESETS) {
+    const option = document.createElement('option');
+    option.value = preset.id;
+    option.textContent = preset.label;
+    option.title = `${preset.nodes.toLocaleString('en-US')} nodes — ${preset.hint}`;
+    select.append(option);
+  }
+  const custom = document.createElement('option');
+  custom.value = CUSTOM_PRESET_ID;
+  custom.textContent = 'Custom';
+  custom.title = 'A budget you typed yourself.';
+  select.append(custom);
+}
+
 function disableAll(message: string): void {
-  for (const id of ['enabled', 'corner', 'nodes-budget', 'download']) ($(id) as HTMLInputElement).disabled = true;
+  for (const id of ['enabled', 'corner', 'page-type', 'nodes-budget', 'download']) {
+    ($(id) as HTMLInputElement).disabled = true;
+  }
   $('hint').innerHTML = `<span class="unavailable">${message}</span>`;
 }
 
@@ -52,20 +71,35 @@ async function main(): Promise<void> {
   const enabled = $<HTMLInputElement>('enabled');
   const corner = $<HTMLSelectElement>('corner');
   const nodes = $<HTMLInputElement>('nodes-budget');
+  const pageType = $<HTMLSelectElement>('page-type');
+  fillPageTypes(pageType);
   enabled.checked = config.enabled;
   corner.value = config.corner;
   nodes.value = String(config.budget.nodes);
+  pageType.value = presetIdForNodes(config.budget.nodes);
 
   enabled.addEventListener('change', async () => {
     await saveSiteConfig(origin, { enabled: enabled.checked });
     setTimeout(() => void refreshState(tabId), 600);
   });
   corner.addEventListener('change', () => void saveSiteConfig(origin, { corner: corner.value as Corner, position: undefined }));
-  nodes.addEventListener('change', () => {
-    const value = Math.max(100, Math.round(Number(nodes.value) || 0));
+  const applyNodeBudget = (value: number) => {
     nodes.value = String(value);
+    pageType.value = presetIdForNodes(value);
     void saveSiteConfig(origin, { budget: { nodes: value } });
+  };
+
+  pageType.addEventListener('change', () => {
+    const preset = PAGE_TYPE_PRESETS.find((p) => p.id === pageType.value);
+    // "Custom" is a state, not a choice: it describes a budget already typed in the box.
+    if (!preset) {
+      pageType.value = CUSTOM_PRESET_ID;
+      return;
+    }
+    applyNodeBudget(preset.nodes);
   });
+
+  nodes.addEventListener('change', () => applyNodeBudget(Math.max(100, Math.round(Number(nodes.value) || 0))));
 
   $('download').addEventListener('click', async () => {
     const snapshot = await sendToTab<Snapshot | { error: string }>(tabId, { type: 'get-snapshot' });
