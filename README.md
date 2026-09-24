@@ -138,4 +138,4 @@ the HUD on live pages) has not yet been verified.
 
 ## License
 
-Not yet licensed. Without a license file the default copyright applies — all rights reserved.
+[CC0 1.0 Universal](LICENSE) — dedicated to the public domain; no rights reserved.
