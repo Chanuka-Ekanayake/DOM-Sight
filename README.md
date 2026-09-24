@@ -6,6 +6,8 @@ while developing, dev-testing or QA-ing .NET MVC / ASP.NET / Vue / React front-e
 
 It is a Chrome/Edge extension (Manifest V3). No code changes are needed in the project being measured.
 
+Repository: <https://github.com/Chanuka-Ekanayake/DOM-Sight>
+
 ```
 ┌ ● DOM 4,120/1,500 · 58 fps      [−] ┐
 │ ████████████████████████████░░░░░░░ │
@@ -35,10 +37,16 @@ the *effect* of DOM size on style recalculation, layout and memory. So the HUD m
 
 ## Install (unpacked)
 
+**Requirements:** Node.js 20+ (built on 22) and Chrome or Edge 116+.
+
 ```bash
+git clone https://github.com/Chanuka-Ekanayake/DOM-Sight.git
+cd DOM-Sight
 npm install
 npm run build          # -> dist/
 ```
+
+`dist/` is build output and is not committed — run the build before loading the extension.
 
 1. Open `chrome://extensions` (or `edge://extensions`), enable **Developer mode**.
 2. **Load unpacked** → select the `dist/` folder.
@@ -121,3 +129,13 @@ src/
   shared/             types, defaults, storage (chrome.storage.sync per origin), messaging
 docs/superpowers/specs/  design spec
 ```
+
+## Status
+
+v0.1.0. All unit and integration tests pass under Vitest/jsdom and the built `dist/` boots under the
+jsdom smoke harness. End-to-end behaviour in a real browser (loading `dist/` unpacked and exercising
+the HUD on live pages) has not yet been verified.
+
+## License
+
+Not yet licensed. Without a license file the default copyright applies — all rights reserved.
